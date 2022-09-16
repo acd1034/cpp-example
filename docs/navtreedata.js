@@ -25,20 +25,13 @@
 var NAVTREE =
 [
   [ "iris", "index.html", [
-    [ "<tt>iris</tt>", "index.html", [
-      [ "Noteworthy Features", "index.html#autotoc_md1", null ],
-      [ "Supported Compilers", "index.html#autotoc_md2", null ],
-      [ "Library Dependencies", "index.html#autotoc_md3", null ]
-    ] ],
-    [ "Files", "files.html", [
-      [ "File List", "files.html", "files_dup" ]
-    ] ]
+    [ "<tt>cpp-example</tt>", "index.html", null ]
   ] ]
 ];
 
 var NAVTREEINDEX =
 [
-"dir_a1d694e242cff870291daa0bc19b1a6d.html"
+"index.html"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';
