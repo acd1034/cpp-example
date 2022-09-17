@@ -31,8 +31,22 @@ namespace ns {
     std::size_t count_ = 0;
 
   public:
+    using difference_type = std::ranges::range_difference_t<View>;
+
     constexpr iterator(std::ranges::iterator_t<View> current, std::size_t count)
       : current_(std::move(current)), count_(std::move(count)) {}
+
+    constexpr std::pair<std::size_t, std::ranges::range_reference_t<View>> //
+    operator*() const {
+      return {count_, *current_};
+    }
+
+    constexpr iterator& operator++() {
+      ++current_;
+      ++count_;
+      return *this;
+    }
+    constexpr void operator++(int) { ++*this; }
   };
 
   template <std::ranges::input_range View>
