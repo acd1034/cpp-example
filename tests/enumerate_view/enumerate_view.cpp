@@ -20,7 +20,9 @@ public:
     return *this;
   }
   constexpr void operator++(int) { ++ptr_; }
-  constexpr bool operator==(const test_input_iterator& other) const { return ptr_ == other.ptr_; }
+  constexpr bool operator==(const test_input_iterator& other) const {
+    return ptr_ == other.ptr_;
+  }
 };
 
 template <class T>
@@ -32,9 +34,13 @@ public:
   test_view() = default;
   constexpr explicit test_view(T v) : value(std::move(v)) {}
   auto begin() { return test_input_iterator<T>(std::addressof(value)); }
-  auto begin() const { return test_input_iterator<const T>(std::addressof(value)); }
+  auto begin() const {
+    return test_input_iterator<const T>(std::addressof(value));
+  }
   auto end() { return test_input_iterator<T>(std::addressof(value) + 1); }
-  auto end() const { return test_input_iterator<const T>(std::addressof(value) + 1); }
+  auto end() const {
+    return test_input_iterator<const T>(std::addressof(value) + 1);
+  }
 };
 
 static_assert(std::ranges::view<test_view<int>>);
