@@ -9,7 +9,7 @@ namespace ns {
   /// @tparam View 元となる view の型
   template <std::ranges::input_range View>
   requires std::ranges::view<View>
-  struct enumerate_view {
+  struct enumerate_view : std::ranges::view_interface<enumerate_view<View>> {
   private:
     //! 元となる view
     View base_ = View();
@@ -18,8 +18,17 @@ namespace ns {
     class sentinel;
 
   public:
+    enumerate_view() requires std::default_initializable<View>
+    = default;
     constexpr enumerate_view(View base) : base_(std::move(base)) {}
+
+    constexpr iterator begin() { return {std::ranges::begin(base_), 0}; }
+
+    constexpr auto end() { return sentinel(std::ranges::end(base_)); }
   };
+
+  template <class Range>
+  enumerate_view(Range&&) -> enumerate_view<std::views::all_t<Range>>;
 
   template <std::ranges::input_range View>
   requires std::ranges::view<View>
