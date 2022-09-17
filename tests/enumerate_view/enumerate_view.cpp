@@ -46,5 +46,6 @@ static_assert(not std::ranges::forward_range<test_view<int>>);
 using testing_view = ns::enumerate_view<test_view<int>>;
 // まだ動かない
 // static_assert(std::input_or_output_iterator<std::ranges::iterator_t<testing_view>>);
+// static_assert(std::sentinel_for<std::ranges::sentinel_t<testing_view>, std::ranges::iterator_t<testing_view>>);
 
 // TEST_CASE("enumerate_view", "[enumerate_view]") {}
