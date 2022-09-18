@@ -42,8 +42,15 @@ namespace ns {
   public:
     using difference_type = std::ranges::range_difference_t<View>;
     using value_type = std::pair<std::size_t, std::ranges::range_value_t<View>>;
-    using iterator_concept = std::input_iterator_tag;
+    // clang-format off
+    using iterator_concept =
+      std::conditional_t<std::ranges::forward_range<View>,       std::forward_iterator_tag,
+      /* else */                                                 std::input_iterator_tag>;
+    // clang-format on
 
+    iterator() requires
+      std::default_initializable<std::ranges::iterator_t<View>>
+    = default;
     constexpr iterator(std::ranges::iterator_t<View> current, std::size_t count)
       : current_(std::move(current)), count_(std::move(count)) {}
 
@@ -65,6 +72,17 @@ namespace ns {
       return *this;
     }
     constexpr void operator++(int) { ++*this; }
+    constexpr iterator
+    operator++(int) requires std::ranges::forward_range<View> {
+      auto tmp = *this;
+      ++*this;
+      return tmp;
+    }
+
+    friend constexpr bool operator==(const iterator& x, const iterator& y) //
+      requires std::equality_comparable<std::ranges::iterator_t<View>> {
+      return x.current_ == y.current_;
+    }
   };
 
   template <std::ranges::input_range View>

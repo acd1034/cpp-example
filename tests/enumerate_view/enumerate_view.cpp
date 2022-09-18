@@ -1,3 +1,4 @@
+#include <forward_list>
 #include <catch2/catch_test_macros.hpp>
 #include <ns/enumerate_view.hpp>
 
@@ -67,6 +68,21 @@ TEST_CASE("enumerate_view", "[enumerate_view]") {
     CHECK(std::get<0>(*it) == 0);
     CHECK(std::get<1>(*it) == 'a');
     ++it;
+    CHECK(it == std::ranges::end(ev));
+  }
+  {
+    std::forward_list<char> fl{'a', 'b', 'c'};
+    ns::enumerate_view ev(fl);
+    static_assert(std::ranges::forward_range<decltype(ev)>);
+    static_assert(not std::ranges::bidirectional_range<decltype(ev)>);
+
+    std::forward_iterator auto it = std::ranges::begin(ev);
+    CHECK(std::get<0>(*it) == 0);
+    CHECK(std::get<1>(*it++) == 'a');
+    CHECK(std::get<0>(*it) == 1);
+    CHECK(std::get<1>(*it++) == 'b');
+    CHECK(std::get<0>(*it) == 2);
+    CHECK(std::get<1>(*it++) == 'c');
     CHECK(it == std::ranges::end(ev));
   }
 }
