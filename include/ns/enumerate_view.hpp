@@ -24,7 +24,13 @@ namespace ns {
 
     constexpr iterator begin() { return {std::ranges::begin(base_), 0}; }
 
-    constexpr auto end() { return sentinel(std::ranges::end(base_)); }
+    constexpr auto end() {
+      if constexpr (std::ranges::common_range<View> and //
+                    std::ranges::sized_range<View>)
+        return iterator(std::ranges::end(base_), std::ranges::size(base_));
+      else
+        return sentinel(std::ranges::end(base_));
+    }
 
     constexpr auto size() requires std::ranges::sized_range<View> {
       return std::ranges::size(base_);

@@ -65,6 +65,7 @@ TEST_CASE("enumerate_view", "[enumerate_view]") {
     ns::enumerate_view ev(tv);
     static_assert(std::ranges::input_range<decltype(ev)>);
     static_assert(not std::ranges::forward_range<decltype(ev)>);
+    static_assert(not std::ranges::common_range<decltype(ev)>);
 
     std::input_iterator auto it = std::ranges::begin(ev);
     // test_cpp20_input_iterator は _Cpp17InputIterator_ 要件を満たさない
@@ -83,6 +84,7 @@ TEST_CASE("enumerate_view", "[enumerate_view]") {
     ns::enumerate_view ev(fl);
     static_assert(std::ranges::forward_range<decltype(ev)>);
     static_assert(not std::ranges::bidirectional_range<decltype(ev)>);
+    static_assert(not std::ranges::common_range<decltype(ev)>);
 
     std::forward_iterator auto it = std::ranges::begin(ev);
     static_assert(
@@ -107,6 +109,7 @@ TEST_CASE("enumerate_view", "[enumerate_view]") {
     ns::enumerate_view ev(l);
     static_assert(std::ranges::bidirectional_range<decltype(ev)>);
     static_assert(not std::ranges::random_access_range<decltype(ev)>);
+    static_assert(std::ranges::common_range<decltype(ev)>);
 
     std::bidirectional_iterator auto it = std::ranges::begin(ev);
     static_assert(
@@ -130,6 +133,7 @@ TEST_CASE("enumerate_view", "[enumerate_view]") {
     std::vector<char> v{'a', 'b', 'c'};
     ns::enumerate_view ev(v);
     static_assert(std::ranges::random_access_range<decltype(ev)>);
+    static_assert(std::ranges::common_range<decltype(ev)>);
 
     std::random_access_iterator auto it = std::ranges::begin(ev);
     static_assert(
@@ -162,5 +166,57 @@ TEST_CASE("enumerate_view", "[enumerate_view]") {
     ns::enumerate_view ev(v);
     static_assert(std::ranges::sized_range<decltype(ev)>);
     CHECK(std::ranges::size(ev) == 3);
+  }
+}
+
+TEST_CASE("enumerate_view", "[enumerate_view][common]") {
+  {
+    std::list<char> l{'a', 'b', 'c'};
+    std::ranges::subrange sr(std::counted_iterator(std::ranges::begin(l), 2),
+                             std::default_sentinel);
+    ns::enumerate_view ev(sr);
+    static_assert(std::ranges::bidirectional_range<decltype(ev)>);
+    static_assert(not std::ranges::random_access_range<decltype(ev)>);
+    static_assert(not std::ranges::common_range<decltype(ev)>);
+
+    std::bidirectional_iterator auto it = std::ranges::begin(ev);
+    static_assert(
+      std::derived_from<
+        typename std::iterator_traits<decltype(it)>::iterator_category,
+        std::input_iterator_tag>);
+    static_assert(
+      not std::derived_from<
+        typename std::iterator_traits<decltype(it)>::iterator_category,
+        std::forward_iterator_tag>);
+
+    CHECK(std::get<0>(*it) == 0);
+    CHECK(std::get<1>(*it++) == 'a');
+    CHECK(std::get<0>(*it) == 1);
+    CHECK(std::get<1>(*it++) == 'b');
+    CHECK(it == std::ranges::end(ev));
+  }
+  {
+    std::vector<char> v{'a', 'b', 'c'};
+    std::ranges::subrange sr(std::counted_iterator(std::ranges::begin(v), 2),
+                             std::default_sentinel);
+    ns::enumerate_view ev(sr);
+    static_assert(std::ranges::random_access_range<decltype(ev)>);
+    static_assert(not std::ranges::common_range<decltype(ev)>);
+
+    std::random_access_iterator auto it = std::ranges::begin(ev);
+    static_assert(
+      std::derived_from<
+        typename std::iterator_traits<decltype(it)>::iterator_category,
+        std::input_iterator_tag>);
+    static_assert(
+      not std::derived_from<
+        typename std::iterator_traits<decltype(it)>::iterator_category,
+        std::forward_iterator_tag>);
+
+    CHECK(std::get<0>(*it) == 0);
+    CHECK(std::get<1>(*it++) == 'a');
+    CHECK(std::get<0>(*it) == 1);
+    CHECK(std::get<1>(*it++) == 'b');
+    CHECK(it == std::ranges::end(ev));
   }
 }
