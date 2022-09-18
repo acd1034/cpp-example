@@ -196,9 +196,7 @@ namespace ns {
     std::ranges::sentinel_t<View> end_ = std::ranges::sentinel_t<View>();
 
   public:
-    sentinel() requires
-      std::default_initializable<std::ranges::sentinel_t<View>>
-    = default;
+    sentinel() = default;
     constexpr explicit sentinel(std::ranges::sentinel_t<View> end)
       : end_(std::move(end)) {}
 
