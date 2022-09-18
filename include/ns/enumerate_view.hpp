@@ -173,6 +173,13 @@ namespace ns {
       std::ranges::random_access_range<View> {
       return x.current_ - y.current_;
     }
+
+    friend constexpr std::pair<std::size_t,
+                               std::ranges::range_rvalue_reference_t<View>>
+    iter_move(const iterator& x) noexcept(
+      noexcept(std::ranges::iter_move(x.current_))) {
+      return {x.count_, std::ranges::iter_move(x.current_)};
+    }
   };
 
   template <std::ranges::input_range View>
