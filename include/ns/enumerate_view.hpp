@@ -44,8 +44,9 @@ namespace ns {
     using value_type = std::pair<std::size_t, std::ranges::range_value_t<View>>;
     // clang-format off
     using iterator_concept =
+      std::conditional_t<std::ranges::bidirectional_range<View>, std::bidirectional_iterator_tag,
       std::conditional_t<std::ranges::forward_range<View>,       std::forward_iterator_tag,
-      /* else */                                                 std::input_iterator_tag>;
+      /* else */                                                 std::input_iterator_tag>>;
     // clang-format on
 
     iterator() requires
@@ -76,6 +77,19 @@ namespace ns {
     operator++(int) requires std::ranges::forward_range<View> {
       auto tmp = *this;
       ++*this;
+      return tmp;
+    }
+
+    constexpr iterator&
+    operator--() requires std::ranges::bidirectional_range<View> {
+      --current_;
+      --count_;
+      return *this;
+    }
+    constexpr iterator
+    operator--(int) requires std::ranges::bidirectional_range<View> {
+      auto tmp = *this;
+      --*this;
       return tmp;
     }
 
