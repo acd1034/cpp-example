@@ -1,5 +1,6 @@
 #include <forward_list>
 #include <list>
+#include <vector>
 #include <catch2/catch_test_macros.hpp>
 #include <ns/enumerate_view.hpp>
 
@@ -93,6 +94,20 @@ TEST_CASE("enumerate_view", "[enumerate_view]") {
     static_assert(not std::ranges::random_access_range<decltype(ev)>);
 
     std::bidirectional_iterator auto it = std::ranges::begin(ev);
+    CHECK(std::get<0>(*it) == 0);
+    CHECK(std::get<1>(*it++) == 'a');
+    CHECK(std::get<0>(*it) == 1);
+    CHECK(std::get<1>(*it++) == 'b');
+    CHECK(std::get<0>(*it) == 2);
+    CHECK(std::get<1>(*it++) == 'c');
+    CHECK(it == std::ranges::end(ev));
+  }
+  {
+    std::vector<char> v{'a', 'b', 'c'};
+    ns::enumerate_view ev(v);
+    static_assert(std::ranges::random_access_range<decltype(ev)>);
+
+    std::random_access_iterator auto it = std::ranges::begin(ev);
     CHECK(std::get<0>(*it) == 0);
     CHECK(std::get<1>(*it++) == 'a');
     CHECK(std::get<0>(*it) == 1);
