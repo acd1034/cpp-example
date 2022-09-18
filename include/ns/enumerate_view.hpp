@@ -41,6 +41,8 @@ namespace ns {
 
   public:
     using difference_type = std::ranges::range_difference_t<View>;
+    using value_type = std::pair<std::size_t, std::ranges::range_value_t<View>>;
+    using iterator_concept = std::input_iterator_tag;
 
     constexpr iterator(std::ranges::iterator_t<View> current, std::size_t count)
       : current_(std::move(current)), count_(std::move(count)) {}

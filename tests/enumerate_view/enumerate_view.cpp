@@ -56,4 +56,17 @@ static_assert(std::sentinel_for<std::ranges::sentinel_t<testing_view>,
                                 std::ranges::iterator_t<testing_view>>);
 static_assert(std::ranges::view<testing_view>);
 
-// TEST_CASE("enumerate_view", "[enumerate_view]") {}
+TEST_CASE("enumerate_view", "[enumerate_view]") {
+  {
+    test_view<char> tv{'a'};
+    ns::enumerate_view ev(tv);
+    static_assert(std::ranges::input_range<decltype(ev)>);
+    static_assert(not std::ranges::forward_range<decltype(ev)>);
+
+    std::input_iterator auto it = std::ranges::begin(ev);
+    CHECK(std::get<0>(*it) == 0);
+    CHECK(std::get<1>(*it) == 'a');
+    ++it;
+    CHECK(it == std::ranges::end(ev));
+  }
+}
