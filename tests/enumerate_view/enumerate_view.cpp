@@ -7,7 +7,7 @@
 // begin test 用の view
 
 template <class T>
-struct test_input_iterator {
+struct test_cpp20_input_iterator {
 private:
   T* ptr_ = nullptr;
 
@@ -15,15 +15,15 @@ public:
   using difference_type = std::ptrdiff_t;
   using value_type = std::remove_cv_t<T>;
   using iterator_concept = std::input_iterator_tag;
-  test_input_iterator() = default;
-  constexpr explicit test_input_iterator(T* ptr) : ptr_(std::move(ptr)) {}
+  test_cpp20_input_iterator() = default;
+  constexpr explicit test_cpp20_input_iterator(T* ptr) : ptr_(std::move(ptr)) {}
   constexpr decltype(auto) operator*() const { return *ptr_; }
-  constexpr test_input_iterator& operator++() {
+  constexpr test_cpp20_input_iterator& operator++() {
     ++ptr_;
     return *this;
   }
   constexpr void operator++(int) { ++ptr_; }
-  constexpr bool operator==(const test_input_iterator& other) const {
+  constexpr bool operator==(const test_cpp20_input_iterator& other) const {
     return ptr_ == other.ptr_;
   }
 };
@@ -36,13 +36,13 @@ private:
 public:
   test_view() = default;
   constexpr explicit test_view(T v) : value(std::move(v)) {}
-  auto begin() { return test_input_iterator<T>(std::addressof(value)); }
+  auto begin() { return test_cpp20_input_iterator<T>(std::addressof(value)); }
   auto begin() const {
-    return test_input_iterator<const T>(std::addressof(value));
+    return test_cpp20_input_iterator<const T>(std::addressof(value));
   }
-  auto end() { return test_input_iterator<T>(std::addressof(value) + 1); }
+  auto end() { return test_cpp20_input_iterator<T>(std::addressof(value) + 1); }
   auto end() const {
-    return test_input_iterator<const T>(std::addressof(value) + 1);
+    return test_cpp20_input_iterator<const T>(std::addressof(value) + 1);
   }
 };
 
