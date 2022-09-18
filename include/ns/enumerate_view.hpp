@@ -14,8 +14,8 @@ namespace ns {
     //! 元となる view
     View base_ = View();
 
-    class iterator;
-    class sentinel;
+    struct iterator;
+    struct sentinel;
 
   public:
     enumerate_view() requires std::default_initializable<View>
