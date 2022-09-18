@@ -116,4 +116,18 @@ TEST_CASE("enumerate_view", "[enumerate_view]") {
     CHECK(std::get<1>(*it++) == 'c');
     CHECK(it == std::ranges::end(ev));
   }
+  {
+    std::vector<char> v{'a', 'b', 'c'};
+    ns::enumerate_view ev(v);
+    std::random_access_iterator auto begin = std::ranges::begin(ev);
+    auto end = std::ranges::end(ev);
+    static_assert(std::sized_sentinel_for<decltype(end), decltype(begin)>);
+    CHECK(std::ranges::end(ev) - std::ranges::begin(ev) == 3);
+  }
+  {
+    std::vector<char> v{'a', 'b', 'c'};
+    ns::enumerate_view ev(v);
+    static_assert(std::ranges::sized_range<decltype(ev)>);
+    CHECK(std::ranges::size(ev) == 3);
+  }
 }

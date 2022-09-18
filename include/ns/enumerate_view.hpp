@@ -25,6 +25,10 @@ namespace ns {
     constexpr iterator begin() { return {std::ranges::begin(base_), 0}; }
 
     constexpr auto end() { return sentinel(std::ranges::end(base_)); }
+
+    constexpr auto size() requires std::ranges::sized_range<View> {
+      return std::ranges::size(base_);
+    }
   };
 
   template <class Range>
@@ -178,6 +182,19 @@ namespace ns {
       std::sentinel_for<std::ranges::sentinel_t<View>,
                         std::ranges::iterator_t<View>> {
       return x.base() == y.end_;
+    }
+
+    friend constexpr std::ranges::range_difference_t<View> //
+    operator-(const iterator& x, const sentinel& y) requires
+      std::sized_sentinel_for<std::ranges::sentinel_t<View>,
+                              std::ranges::iterator_t<View>> {
+      return x.base() - y.end_;
+    }
+    friend constexpr std::ranges::range_difference_t<View>
+    operator-(const sentinel& x, const iterator& y) requires
+      std::sized_sentinel_for<std::ranges::sentinel_t<View>,
+                              std::ranges::iterator_t<View>> {
+      return x.end_ - y.base();
     }
   };
 } // namespace ns
