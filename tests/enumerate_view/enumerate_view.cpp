@@ -67,6 +67,12 @@ TEST_CASE("enumerate_view", "[enumerate_view]") {
     static_assert(not std::ranges::forward_range<decltype(ev)>);
 
     std::input_iterator auto it = std::ranges::begin(ev);
+    // test_cpp20_input_iterator は _Cpp17InputIterator_ 要件を満たさない
+    // static_assert(
+    //   not std::derived_from<
+    //     typename std::iterator_traits<decltype(it)>::iterator_category,
+    //     std::input_iterator_tag>);
+
     CHECK(std::get<0>(*it) == 0);
     CHECK(std::get<1>(*it) == 'a');
     ++it;
@@ -79,6 +85,15 @@ TEST_CASE("enumerate_view", "[enumerate_view]") {
     static_assert(not std::ranges::bidirectional_range<decltype(ev)>);
 
     std::forward_iterator auto it = std::ranges::begin(ev);
+    static_assert(
+      std::derived_from<
+        typename std::iterator_traits<decltype(it)>::iterator_category,
+        std::input_iterator_tag>);
+    static_assert(
+      not std::derived_from<
+        typename std::iterator_traits<decltype(it)>::iterator_category,
+        std::forward_iterator_tag>);
+
     CHECK(std::get<0>(*it) == 0);
     CHECK(std::get<1>(*it++) == 'a');
     CHECK(std::get<0>(*it) == 1);
@@ -94,6 +109,15 @@ TEST_CASE("enumerate_view", "[enumerate_view]") {
     static_assert(not std::ranges::random_access_range<decltype(ev)>);
 
     std::bidirectional_iterator auto it = std::ranges::begin(ev);
+    static_assert(
+      std::derived_from<
+        typename std::iterator_traits<decltype(it)>::iterator_category,
+        std::input_iterator_tag>);
+    static_assert(
+      not std::derived_from<
+        typename std::iterator_traits<decltype(it)>::iterator_category,
+        std::forward_iterator_tag>);
+
     CHECK(std::get<0>(*it) == 0);
     CHECK(std::get<1>(*it++) == 'a');
     CHECK(std::get<0>(*it) == 1);
@@ -108,6 +132,15 @@ TEST_CASE("enumerate_view", "[enumerate_view]") {
     static_assert(std::ranges::random_access_range<decltype(ev)>);
 
     std::random_access_iterator auto it = std::ranges::begin(ev);
+    static_assert(
+      std::derived_from<
+        typename std::iterator_traits<decltype(it)>::iterator_category,
+        std::input_iterator_tag>);
+    static_assert(
+      not std::derived_from<
+        typename std::iterator_traits<decltype(it)>::iterator_category,
+        std::forward_iterator_tag>);
+
     CHECK(std::get<0>(*it) == 0);
     CHECK(std::get<1>(*it++) == 'a');
     CHECK(std::get<0>(*it) == 1);

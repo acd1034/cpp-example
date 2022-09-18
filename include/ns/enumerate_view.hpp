@@ -34,9 +34,21 @@ namespace ns {
   template <class Range>
   enumerate_view(Range&&) -> enumerate_view<std::views::all_t<Range>>;
 
+  template <class View>
+  struct deduce_iterator_category {};
+
+  template <class View>
+  requires requires {
+    typename std::iterator_traits<
+      std::ranges::iterator_t<View>>::iterator_category;
+  }
+  struct deduce_iterator_category<View> {
+    using iterator_category = std::input_iterator_tag;
+  };
+
   template <std::ranges::input_range View>
   requires std::ranges::view<View>
-  struct enumerate_view<View>::iterator {
+  struct enumerate_view<View>::iterator : deduce_iterator_category<View> {
   private:
     //! 元となるイテレータの現在位置
     std::ranges::iterator_t<View> current_ = std::ranges::iterator_t<View>();
