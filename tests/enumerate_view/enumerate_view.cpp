@@ -60,8 +60,8 @@ static_assert(std::ranges::view<testing_view>);
 
 TEST_CASE("enumerate_view", "[enumerate_view]") {
   {
-    test_range<char> tv{'a'};
-    ns::enumerate_view ev(tv);
+    test_range<char> tr{'a'};
+    ns::enumerate_view ev(tr);
     static_assert(std::ranges::input_range<decltype(ev)>);
     static_assert(not std::ranges::forward_range<decltype(ev)>);
     static_assert(not std::ranges::common_range<decltype(ev)>);
