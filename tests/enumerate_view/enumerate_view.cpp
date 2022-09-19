@@ -4,7 +4,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <ns/enumerate_view.hpp>
 
-// begin test 用の view
+// begin テスト用の view
 
 template <class T>
 struct test_cpp20_input_iterator {
@@ -29,13 +29,13 @@ public:
 };
 
 template <class T>
-struct test_view : std::ranges::view_base {
+struct test_range {
 private:
   T value{};
 
 public:
-  test_view() = default;
-  constexpr explicit test_view(T v) : value(std::move(v)) {}
+  test_range() = default;
+  constexpr explicit test_range(T v) : value(std::move(v)) {}
   auto begin() { return test_cpp20_input_iterator<T>(std::addressof(value)); }
   auto begin() const {
     return test_cpp20_input_iterator<const T>(std::addressof(value));
@@ -46,13 +46,12 @@ public:
   }
 };
 
-static_assert(std::ranges::view<test_view<int>>);
-static_assert(std::ranges::input_range<test_view<int>>);
-static_assert(not std::ranges::forward_range<test_view<int>>);
+static_assert(std::ranges::input_range<test_range<int>>);
+static_assert(not std::ranges::forward_range<test_range<int>>);
 
-// end test 用の view
+// end テスト用の view
 
-using testing_view = ns::enumerate_view<test_view<int>>;
+using testing_view = ns::enumerate_view<std::views::all_t<test_range<int>>>;
 static_assert(
   std::input_or_output_iterator<std::ranges::iterator_t<testing_view>>);
 static_assert(std::sentinel_for<std::ranges::sentinel_t<testing_view>,
@@ -61,7 +60,7 @@ static_assert(std::ranges::view<testing_view>);
 
 TEST_CASE("enumerate_view", "[enumerate_view]") {
   {
-    test_view<char> tv{'a'};
+    test_range<char> tv{'a'};
     ns::enumerate_view ev(tv);
     static_assert(std::ranges::input_range<decltype(ev)>);
     static_assert(not std::ranges::forward_range<decltype(ev)>);
