@@ -73,3 +73,4 @@ FetchContent_Declare(Catch2
 FetchContent_MakeAvailable(Catch2)
 
 add_subdirectory(enumerate_view)
+add_subdirectory(tuple_arrange)
