@@ -22,4 +22,10 @@ TEST_CASE("tuple_arrange", "[tuple_arrange]") {
       CHECK(z == "Hello");
     }
   }
+  { // tuple_element_index_v
+    using Tuple = std::tuple<int, double, std::string>;
+    STATIC_CHECK(ns::tuple_element_index_v<int, Tuple> == 0);
+    STATIC_CHECK(ns::tuple_element_index_v<double, Tuple> == 1);
+    STATIC_CHECK(ns::tuple_element_index_v<std::string, Tuple> == 2);
+  }
 }
