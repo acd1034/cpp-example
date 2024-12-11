@@ -1,6 +1,8 @@
 #include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <ns/tuple_arrange.hpp>
+#include <chrono>
+#include <format>
 #include <string>
 
 std::string test_fn(int, const double&, std::string&&);
@@ -61,5 +63,17 @@ TEST_CASE("tuple_arrange", "[tuple_arrange]") {
     STATIC_CHECK(std::is_same_v<
                  ns::function_args_type<decltype(&test_fn)>,
                  std::tuple<int, const double&, std::string&&>>);
+  }
+}
+
+std::string to_str(const int& i, const double& d, const std::string& s) {
+  return std::format("({}, {}, {})", i, d, s);
+}
+
+TEST_CASE("unordered_fn", "[tupple_arrange][unordered_fn]") {
+  { // unordered_fn
+    constexpr auto unordered_to_str = ns::unordered_fn(&to_str);
+    CHECK(
+      unordered_to_str(3.14, 0, std::string("Hello")) == "(0, 3.14, Hello)");
   }
 }

@@ -87,4 +87,56 @@ namespace ns {
   using function_result_type = typename function_traits<F>::result_type;
   template <class F>
   using function_args_type = typename function_traits<F>::args_type;
+
+  // unordered_fn
+  template <class F>
+  struct unordered_fn_t {
+    F f;
+
+    template <class G, class... Args>
+    static constexpr auto call(G&& g, Args&&... args)
+      -> function_result_type<F> {
+      auto reordered_tpl =
+        []<std::size_t... Is>(auto&& tpl, std::index_sequence<Is...>) {
+          return tuple_select_by_type<std::remove_cvref_t<
+            std::tuple_element_t<Is, function_args_type<F>>>...>(
+            std::forward<decltype(tpl)>(tpl));
+        }(std::make_tuple(std::forward<Args>(args)...),
+          std::index_sequence_for<Args...>{});
+      return std::apply(std::forward<G>(g), std::move(reordered_tpl));
+    }
+
+    template <class... Args>
+    constexpr auto operator()(Args&&... args) & noexcept(
+      noexcept(call(f, std::forward<Args>(args)...)))
+      -> decltype(call(f, std::forward<Args>(args)...)) {
+      return call(f, std::forward<Args>(args)...);
+    }
+
+    template <class... Args>
+    constexpr auto operator()(Args&&... args) const& noexcept(
+      noexcept(call(f, std::forward<Args>(args)...)))
+      -> decltype(call(f, std::forward<Args>(args)...)) {
+      return call(f, std::forward<Args>(args)...);
+    }
+
+    template <class... Args>
+    constexpr auto operator()(Args&&... args) && noexcept(
+      noexcept(call(std::move(f), std::forward<Args>(args)...)))
+      -> decltype(call(std::move(f), std::forward<Args>(args)...)) {
+      return call(std::move(f), std::forward<Args>(args)...);
+    }
+
+    template <class... Args>
+    constexpr auto operator()(Args&&... args) const&& noexcept(
+      noexcept(call(std::move(f), std::forward<Args>(args)...)))
+      -> decltype(call(std::move(f), std::forward<Args>(args)...)) {
+      return call(std::move(f), std::forward<Args>(args)...);
+    }
+  };
+
+  template <class F>
+  constexpr auto unordered_fn(F&& f) -> unordered_fn_t<std::remove_cvref_t<F>> {
+    return {std::forward<F>(f)};
+  }
 } // namespace ns
