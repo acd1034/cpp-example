@@ -1,9 +1,9 @@
+#include <array>
 #include <cassert>
 #include <concepts>
 #include <format>
 #include <functional>
-#include <iterator>
-#include <ranges>
+#include <numeric>
 #include <type_traits>
 #include <utility>
 
@@ -155,5 +155,31 @@ namespace ns {
   template <class F>
   constexpr auto unordered_fn(F&& f) -> unordered_fn_t<std::remove_cvref_t<F>> {
     return {std::forward<F>(f)};
+  }
+
+  // make_permutation
+
+  constexpr auto xorshift64(std::uint64_t max, std::uint64_t state)
+    -> std::pair<std::uint64_t, std::uint64_t> {
+    state ^= state << 13;
+    state ^= state >> 7;
+    state ^= state << 17;
+    return {state % (max + 1), state};
+  }
+
+  template <std::size_t N>
+  constexpr auto make_permutation(std::uint64_t state)
+    -> std::array<std::size_t, N> {
+    if constexpr (N == 0) {
+      return {};
+    } else {
+      std::array<std::size_t, N> arr{};
+      std::iota(arr.begin(), arr.end(), 0);
+      for (std::size_t i = N - 1, j; i > 0; --i) {
+        std::tie(j, state) = xorshift64(i, state);
+        std::swap(arr[i], arr[j]);
+      }
+      return arr;
+    }
   }
 } // namespace ns

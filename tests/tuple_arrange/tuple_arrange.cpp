@@ -1,6 +1,7 @@
 #include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <ns/tuple_arrange.hpp>
+#include <algorithm>
 #include <chrono>
 #include <format>
 #include <string>
@@ -120,4 +121,17 @@ TEST_CASE("unordered_to_digit", "[tuple_arrange][unordered_to_digit]") {
   CHECK(
     unordered_to_digit(chrono::day{16}, chrono::December, chrono::year{2022}) ==
     20221216);
+}
+
+TEST_CASE("make_permutation", "[tuple_arrange][make_permutation]") {
+  constexpr auto N = 10;
+  auto indices = ns::make_permutation<N>(0x01234567DEADC0DE);
+  std::sort(indices.begin(), indices.end());
+  for (std::size_t i = 1; i < N; ++i) {
+    CHECK(indices[i] != indices[i - 1]);
+  }
+  for (const auto& index : indices) {
+    CHECK(index >= 0);
+    CHECK(index < N);
+  }
 }
