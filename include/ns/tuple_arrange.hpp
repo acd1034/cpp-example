@@ -65,4 +65,26 @@ namespace ns {
     return tuple_format(
       tpl, std::make_index_sequence<std::tuple_size_v<Tuple>>{});
   }
+
+  // function_result_type, function_args_type
+  // https://github.com/llvm/llvm-project/blob/2f18b5ef030e37f3b229e767081a804b7c038a07/llvm/include/llvm/ADT/STLExtras.h#L86
+  template <class F>
+  struct function_traits;
+  template <class R, class... Args>
+  struct function_traits<R (*)(Args...)> {
+    using result_type = R;
+    using args_type = std::tuple<Args...>;
+  };
+  // Overload for const pointers
+  template <class R, class... Args>
+  struct function_traits<R (*const)(Args...)>
+    : function_traits<R (*)(Args...)> {};
+  // Overload for references
+  template <class R, class... Args>
+  struct function_traits<R (&)(Args...)> : function_traits<R (*)(Args...)> {};
+
+  template <class F>
+  using function_result_type = typename function_traits<F>::result_type;
+  template <class F>
+  using function_args_type = typename function_traits<F>::args_type;
 } // namespace ns

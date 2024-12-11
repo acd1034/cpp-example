@@ -3,6 +3,8 @@
 #include <ns/tuple_arrange.hpp>
 #include <string>
 
+std::string test_fn(int, const double&, std::string&&);
+
 TEST_CASE("tuple_arrange", "[tuple_arrange]") {
   { // tuple_select
     std::tuple tpl{0, 3.14, std::string("Hello")};
@@ -49,5 +51,15 @@ TEST_CASE("tuple_arrange", "[tuple_arrange]") {
   { // tuple_format
     std::tuple tpl{0, 3.14, std::string("Hello")};
     CHECK(ns::tuple_format(tpl) == "(0, 3.14, Hello)");
+  }
+  { // function_result_type, function_args_type
+    // clang-format off
+    STATIC_CHECK(std::is_same_v<
+                 ns::function_result_type<decltype(&test_fn)>,
+                 std::string>);
+    // clang-format on
+    STATIC_CHECK(std::is_same_v<
+                 ns::function_args_type<decltype(&test_fn)>,
+                 std::tuple<int, const double&, std::string&&>>);
   }
 }
