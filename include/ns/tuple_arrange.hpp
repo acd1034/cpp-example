@@ -1,7 +1,7 @@
 #include <cassert>
 #include <concepts>
+#include <format>
 #include <functional>
-#include <iostream>
 #include <iterator>
 #include <ranges>
 #include <type_traits>
@@ -43,5 +43,26 @@ namespace ns {
     return tuple_select<
       tuple_element_index_v<Ts, std::remove_reference_t<decltype(tpl)>>...>(
       std::forward<decltype(tpl)>(tpl));
+  }
+
+  // tuple_format
+  template <class Tuple, std::size_t... Is>
+  constexpr auto tuple_format(const Tuple& tpl, std::index_sequence<Is...>)
+    -> std::string {
+    std::string str{};
+    const char* dlm = "";
+    using swallow = std::initializer_list<int>;
+    (void)swallow{
+      (void(
+         str = std::format(
+           "{}{}{}", str, std::exchange(dlm, ", "), std::get<Is>(tpl))),
+       0)...};
+    return std::format("({})", str);
+  }
+
+  template <class Tuple>
+  constexpr auto tuple_format(const Tuple& tpl) -> std::string {
+    return tuple_format(
+      tpl, std::make_index_sequence<std::tuple_size_v<Tuple>>{});
   }
 } // namespace ns

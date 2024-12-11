@@ -46,4 +46,8 @@ TEST_CASE("tuple_arrange", "[tuple_arrange]") {
       CHECK(z == "Hello");
     }
   }
+  { // tuple_format
+    std::tuple tpl{0, 3.14, std::string("Hello")};
+    CHECK(ns::tuple_format(tpl) == "(0, 3.14, Hello)");
+  }
 }
