@@ -9,6 +9,7 @@
 
 namespace ns {
   // tuple_select
+
   template <std::size_t... Is>
   constexpr auto tuple_select(auto&& tpl) -> std::tuple<
     std::tuple_element_t<Is, std::remove_reference_t<decltype(tpl)>>...> {
@@ -16,6 +17,7 @@ namespace ns {
   }
 
   // tuple_element_index_v
+
   // clang-format off
   template <std::size_t I, class T>
   struct tuple_leaf {};
@@ -38,6 +40,7 @@ namespace ns {
   // clang-format on
 
   // tuple_select_by_type
+
   template <typename... Ts>
   constexpr decltype(auto) tuple_select_by_type(auto&& tpl) {
     return tuple_select<
@@ -46,6 +49,7 @@ namespace ns {
   }
 
   // tuple_format
+
   template <class Tuple, std::size_t... Is>
   constexpr auto tuple_format(const Tuple& tpl, std::index_sequence<Is...>)
     -> std::string {
@@ -67,6 +71,7 @@ namespace ns {
   }
 
   // function_result_type, function_args_type
+
   // https://github.com/llvm/llvm-project/blob/2f18b5ef030e37f3b229e767081a804b7c038a07/llvm/include/llvm/ADT/STLExtras.h#L86
   // Overload for function objects
   template <class F, bool isClass = std::is_class<F>::value>
@@ -102,21 +107,20 @@ namespace ns {
   using function_args_type = typename function_traits<F>::args_type;
 
   // unordered_fn
+
   template <class F>
   struct unordered_fn_t {
     F f;
 
     template <class G, class... Args>
     static constexpr auto call(G&& g, Args&&... args)
-      -> function_result_type<F> {
-      auto reordered_tpl =
-        []<std::size_t... Is>(auto&& tpl, std::index_sequence<Is...>) {
-          return tuple_select_by_type<std::remove_cvref_t<
-            std::tuple_element_t<Is, function_args_type<F>>>...>(
-            std::forward<decltype(tpl)>(tpl));
-        }(std::make_tuple(std::forward<Args>(args)...),
-          std::index_sequence_for<Args...>{});
-      return std::apply(std::forward<G>(g), std::move(reordered_tpl));
+      -> function_result_type<std::remove_cvref_t<G>> {
+      return [&]<class... Ts>(std::type_identity<std::tuple<Ts...>>) {
+        auto tpl = std::make_tuple(std::forward<Args>(args)...);
+        auto reordered_tpl =
+          tuple_select_by_type<std::remove_cvref_t<Ts>...>(std::move(tpl));
+        return std::apply(std::forward<G>(g), std::move(reordered_tpl));
+      }(std::type_identity<function_args_type<std::remove_cvref_t<G>>>{});
     }
 
     template <class... Args>
