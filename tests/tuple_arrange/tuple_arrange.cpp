@@ -123,9 +123,11 @@ TEST_CASE("unordered_to_digit", "[tuple_arrange][unordered_to_digit]") {
     20221216);
 }
 
+inline constexpr std::uint64_t Seed = 0x01234567DEADC0DE;
+
 TEST_CASE("make_permutation", "[tuple_arrange][make_permutation]") {
-  constexpr auto N = 10;
-  auto indices = ns::make_permutation<N>(0x01234567DEADC0DE);
+  constexpr std::size_t N = 10;
+  auto indices = ns::make_permutation<N>(Seed);
   std::sort(indices.begin(), indices.end());
   for (std::size_t i = 1; i < N; ++i) {
     CHECK(indices[i] != indices[i - 1]);
@@ -138,18 +140,17 @@ TEST_CASE("make_permutation", "[tuple_arrange][make_permutation]") {
 
 TEST_CASE("tuple_shuffle", "[tuple_arrange][tuple_shuffle]") {
   std::tuple tpl{0, 3.14, std::string("Hello")};
-  auto tpl2 = ns::tuple_shuffle<0x01234567DEADC0DE>(tpl);
+  auto tpl2 = ns::tuple_shuffle<Seed>(tpl);
   {
     STATIC_CHECK(ns::tuple_element_index_v<int, decltype(tpl2)> < 3);
     STATIC_CHECK(ns::tuple_element_index_v<double, decltype(tpl2)> < 3);
     STATIC_CHECK(ns::tuple_element_index_v<std::string, decltype(tpl2)> < 3);
-    CHECK(ns::tuple_format(tpl2) != ns::tuple_format(tpl));
   }
   {
-    auto tpl3 = ns::tuple_shuffle<0x01234567DEADC0DF>(tpl);
-    bool happens_1_in_36_times =
-      ns::tuple_format(tpl2) == ns::tuple_format(tpl) and
-      ns::tuple_format(tpl3) == ns::tuple_format(tpl2);
-    CHECK_FALSE(happens_1_in_36_times);
+    auto tpl3 = ns::tuple_shuffle<Seed + 1>(tpl);
+    constexpr bool Happens1In36Times =
+      std::is_same_v<decltype(tpl2), decltype(tpl)> and
+      std::is_same_v<decltype(tpl3), decltype(tpl)>;
+    STATIC_CHECK_FALSE(Happens1In36Times);
   }
 }
