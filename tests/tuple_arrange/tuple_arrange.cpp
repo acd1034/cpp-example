@@ -55,14 +55,29 @@ TEST_CASE("tuple_arrange", "[tuple_arrange]") {
     CHECK(ns::tuple_format(tpl) == "(0, 3.14, Hello)");
   }
   { // function_result_type, function_args_type
-    // clang-format off
-    STATIC_CHECK(std::is_same_v<
-                 ns::function_result_type<decltype(&test_fn)>,
-                 std::string>);
-    // clang-format on
-    STATIC_CHECK(std::is_same_v<
-                 ns::function_args_type<decltype(&test_fn)>,
-                 std::tuple<int, const double&, std::string&&>>);
+    {
+      // clang-format off
+      STATIC_CHECK(std::is_same_v<
+                  ns::function_result_type<decltype(&test_fn)>,
+                  std::string>);
+      // clang-format on
+      STATIC_CHECK(std::is_same_v<
+                   ns::function_args_type<decltype(&test_fn)>,
+                   std::tuple<int, const double&, std::string&&>>);
+    }
+    {
+      constexpr auto test_fn_obj = [](int, const double&, std::string&&) {
+        return std::string{};
+      };
+      // clang-format off
+      STATIC_CHECK(std::is_same_v<
+                  ns::function_result_type<decltype(test_fn_obj)>,
+                  std::string>);
+      // clang-format on
+      STATIC_CHECK(std::is_same_v<
+                   ns::function_args_type<decltype(test_fn_obj)>,
+                   std::tuple<int, const double&, std::string&&>>);
+    }
   }
 }
 
@@ -71,9 +86,33 @@ std::string to_str(const int& i, const double& d, const std::string& s) {
 }
 
 TEST_CASE("unordered_fn", "[tupple_arrange][unordered_fn]") {
+  // clang-format off
   { // unordered_fn
-    constexpr auto unordered_to_str = ns::unordered_fn(&to_str);
-    CHECK(
-      unordered_to_str(3.14, 0, std::string("Hello")) == "(0, 3.14, Hello)");
+    {
+      constexpr auto unordered_to_str = ns::unordered_fn(&to_str);
+      CHECK(
+        unordered_to_str(3.14, 0, std::string("Hello")) == "(0, 3.14, Hello)");
+    }
+    {
+      constexpr auto to_str_fn_obj =
+        [](const int& i, const double& d, const std::string& s) {
+          return std::format("({}, {}, {})", i, d, s);
+        };
+      constexpr auto unordered_to_str = ns::unordered_fn(to_str_fn_obj);
+      CHECK(
+        unordered_to_str(3.14, 0, std::string("Hello")) == "(0, 3.14, Hello)");
+    }
   }
+  { // usecase of unordered_fn
+    namespace chrono = std::chrono;
+    constexpr auto to_digit =
+      [](const chrono::year& y, const chrono::month& m, const chrono::day& d) {
+        return 10000 * int(y) + 100 * int(unsigned(m)) + int(unsigned(d));
+      };
+    constexpr auto unordered_to_digit = ns::unordered_fn(to_digit);
+    CHECK(
+      unordered_to_digit(
+        chrono::day{16}, chrono::December, chrono::year{2022}) == 20221216);
+  }
+// clang-format on
 }
