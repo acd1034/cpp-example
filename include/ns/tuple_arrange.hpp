@@ -182,4 +182,15 @@ namespace ns {
       return arr;
     }
   }
+
+  // tuple_shuffle
+
+  template <std::uint64_t State>
+  constexpr decltype(auto) tuple_shuffle(auto&& tpl) {
+    return [&]<std::size_t... Is>(std::index_sequence<Is...>) {
+      constexpr auto indices = make_permutation<sizeof...(Is)>(State);
+      return tuple_select<indices[Is]...>(std::forward<decltype(tpl)>(tpl));
+    }(std::make_index_sequence<
+             std::tuple_size_v<std::remove_reference_t<decltype(tpl)>>>{});
+  }
 } // namespace ns

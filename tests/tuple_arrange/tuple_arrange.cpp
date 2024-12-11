@@ -135,3 +135,21 @@ TEST_CASE("make_permutation", "[tuple_arrange][make_permutation]") {
     CHECK(index < N);
   }
 }
+
+TEST_CASE("tuple_shuffle", "[tuple_arrange][tuple_shuffle]") {
+  std::tuple tpl{0, 3.14, std::string("Hello")};
+  auto tpl2 = ns::tuple_shuffle<0x01234567DEADC0DE>(tpl);
+  {
+    STATIC_CHECK(ns::tuple_element_index_v<int, decltype(tpl2)> < 3);
+    STATIC_CHECK(ns::tuple_element_index_v<double, decltype(tpl2)> < 3);
+    STATIC_CHECK(ns::tuple_element_index_v<std::string, decltype(tpl2)> < 3);
+    CHECK(ns::tuple_format(tpl2) != ns::tuple_format(tpl));
+  }
+  {
+    auto tpl3 = ns::tuple_shuffle<0x01234567DEADC0DF>(tpl);
+    bool happens_1_in_36_times =
+      ns::tuple_format(tpl2) == ns::tuple_format(tpl) and
+      ns::tuple_format(tpl3) == ns::tuple_format(tpl2);
+    CHECK_FALSE(happens_1_in_36_times);
+  }
+}
