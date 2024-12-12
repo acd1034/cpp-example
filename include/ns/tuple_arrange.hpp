@@ -115,12 +115,12 @@ namespace ns {
     template <class G, class... Args>
     static constexpr auto call(G&& g, Args&&... args)
       -> function_result_type<std::remove_cvref_t<G>> {
-      return [&]<class... Ts>(std::type_identity<std::tuple<Ts...>>) {
+      return [&]<class... Ts>(std::in_place_type_t<std::tuple<Ts...>>) {
         auto tpl = std::make_tuple(std::forward<Args>(args)...);
         auto reordered_tpl =
           tuple_select_by_type<std::remove_cvref_t<Ts>...>(std::move(tpl));
         return std::apply(std::forward<G>(g), std::move(reordered_tpl));
-      }(std::type_identity<function_args_type<std::remove_cvref_t<G>>>{});
+      }(std::in_place_type<function_args_type<std::remove_cvref_t<G>>>);
     }
 
     template <class... Args>
