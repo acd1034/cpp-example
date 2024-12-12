@@ -17,21 +17,45 @@ TEST_CASE("valid_tuple", "[tuple_arrange][valid_tuple]") {
 }
 
 TEST_CASE("tuple_select", "[tuple_arrange][tuple_select]") {
-  std::tuple tpl{0, 3.14, std::string("Hello")};
   {
-    auto [x] = ns::tuple_select<1>(tpl);
-    CHECK(x == Catch::Approx(3.14));
+    std::tuple tpl{0, 3.14, std::string("Hello")};
+    {
+      auto [x] = ns::tuple_select<1>(tpl);
+      CHECK(x == Catch::Approx(3.14));
+    }
+    {
+      auto [x, y] = ns::tuple_select<1, 2>(tpl);
+      CHECK(x == Catch::Approx(3.14));
+      CHECK(y == "Hello");
+    }
+    {
+      auto [x, y, z] = ns::tuple_select<1, 0, 2>(tpl);
+      CHECK(x == Catch::Approx(3.14));
+      CHECK(y == 0);
+      CHECK(z == "Hello");
+    }
   }
   {
-    auto [x, y] = ns::tuple_select<1, 2>(tpl);
-    CHECK(x == Catch::Approx(3.14));
-    CHECK(y == "Hello");
-  }
-  {
-    auto [x, y, z] = ns::tuple_select<1, 0, 2>(tpl);
-    CHECK(x == Catch::Approx(3.14));
-    CHECK(y == 0);
-    CHECK(z == "Hello");
+    // Check with forward_as_tuple
+    double d = 3.14;
+    {
+      auto&& [x] =
+        ns::tuple_select<1>(std::forward_as_tuple(0, d, std::string("Hello")));
+      CHECK(x == Catch::Approx(3.14));
+    }
+    {
+      auto&& [x, y] = ns::tuple_select<1, 2>(
+        std::forward_as_tuple(0, d, std::string("Hello")));
+      CHECK(x == Catch::Approx(3.14));
+      CHECK(y == "Hello");
+    }
+    {
+      auto&& [x, y, z] = ns::tuple_select<1, 0, 2>(
+        std::forward_as_tuple(0, d, std::string("Hello")));
+      CHECK(x == Catch::Approx(3.14));
+      CHECK(y == 0);
+      CHECK(z == "Hello");
+    }
   }
 }
 
@@ -43,21 +67,46 @@ TEST_CASE("tuple_element_index_v", "[tuple_arrange][tuple_element_index_v]") {
 }
 
 TEST_CASE("tuple_select_by_type", "[tuple_arrange][tuple_select_by_type]") {
-  std::tuple tpl{0, 3.14, std::string("Hello")};
   {
-    auto [x] = ns::tuple_select_by_type<double>(tpl);
-    CHECK(x == Catch::Approx(3.14));
+    std::tuple tpl{0, 3.14, std::string("Hello")};
+    {
+      auto [x] = ns::tuple_select_by_type<double>(tpl);
+      CHECK(x == Catch::Approx(3.14));
+    }
+    {
+      auto [x, y] = ns::tuple_select_by_type<double, std::string>(tpl);
+      CHECK(x == Catch::Approx(3.14));
+      CHECK(y == "Hello");
+    }
+    {
+      auto [x, y, z] = ns::tuple_select_by_type<double, int, std::string>(tpl);
+      CHECK(x == Catch::Approx(3.14));
+      CHECK(y == 0);
+      CHECK(z == "Hello");
+    }
   }
   {
-    auto [x, y] = ns::tuple_select_by_type<double, std::string>(tpl);
-    CHECK(x == Catch::Approx(3.14));
-    CHECK(y == "Hello");
-  }
-  {
-    auto [x, y, z] = ns::tuple_select_by_type<double, int, std::string>(tpl);
-    CHECK(x == Catch::Approx(3.14));
-    CHECK(y == 0);
-    CHECK(z == "Hello");
+    // Check with forward_as_tuple
+    double d = 3.14;
+    {
+      auto&& [x] = ns::tuple_select_by_type<double&>(
+        std::forward_as_tuple(0, d, std::string("Hello")));
+      CHECK(x == Catch::Approx(3.14));
+    }
+    {
+      auto&& [x, y] = ns::tuple_select_by_type<double&, std::string&&>(
+        std::forward_as_tuple(0, d, std::string("Hello")));
+      CHECK(x == Catch::Approx(3.14));
+      CHECK(y == "Hello");
+    }
+    {
+      auto&& [x, y, z] =
+        ns::tuple_select_by_type<double&, int&&, std::string&&>(
+          std::forward_as_tuple(0, d, std::string("Hello")));
+      CHECK(x == Catch::Approx(3.14));
+      CHECK(y == 0);
+      CHECK(z == "Hello");
+    }
   }
 }
 
@@ -149,18 +198,42 @@ TEST_CASE("make_permutation", "[tuple_arrange][make_permutation]") {
 }
 
 TEST_CASE("tuple_shuffle", "[tuple_arrange][tuple_shuffle]") {
-  std::tuple tpl{0, 3.14, std::string("Hello")};
-  auto tpl2 = ns::tuple_shuffle<Seed>(tpl);
   {
-    STATIC_CHECK(ns::tuple_element_index_v<int, decltype(tpl2)> < 3);
-    STATIC_CHECK(ns::tuple_element_index_v<double, decltype(tpl2)> < 3);
-    STATIC_CHECK(ns::tuple_element_index_v<std::string, decltype(tpl2)> < 3);
+    std::tuple tpl{0, 3.14, std::string("Hello")};
+    auto tpl2 = ns::tuple_shuffle<Seed>(tpl);
+    {
+      STATIC_CHECK(ns::tuple_element_index_v<int, decltype(tpl2)> < 3);
+      STATIC_CHECK(ns::tuple_element_index_v<double, decltype(tpl2)> < 3);
+      STATIC_CHECK(ns::tuple_element_index_v<std::string, decltype(tpl2)> < 3);
+    }
+    {
+      auto tpl3 = ns::tuple_shuffle<Seed + 1>(tpl);
+      constexpr bool Happens1In36Times =
+        std::is_same_v<decltype(tpl2), decltype(tpl)> and
+        std::is_same_v<decltype(tpl3), decltype(tpl)>;
+      STATIC_CHECK_FALSE(Happens1In36Times);
+    }
   }
   {
-    auto tpl3 = ns::tuple_shuffle<Seed + 1>(tpl);
-    constexpr bool Happens1In36Times =
-      std::is_same_v<decltype(tpl2), decltype(tpl)> and
-      std::is_same_v<decltype(tpl3), decltype(tpl)>;
-    STATIC_CHECK_FALSE(Happens1In36Times);
+    // Check with forward_as_tuple
+    double d = 3.14;
+    auto tpl2 = ns::tuple_shuffle<Seed>(
+      std::forward_as_tuple(0, d, std::string("Hello")));
+    {
+      STATIC_CHECK(ns::tuple_element_index_v<int&&, decltype(tpl2)> < 3);
+      STATIC_CHECK(ns::tuple_element_index_v<double&, decltype(tpl2)> < 3);
+      STATIC_CHECK(
+        ns::tuple_element_index_v<std::string&&, decltype(tpl2)> < 3);
+    }
+    {
+      auto tpl3 = ns::tuple_shuffle<Seed + 1>(
+        std::forward_as_tuple(0, d, std::string("Hello")));
+      // clang-format off
+      constexpr bool Happens1In36Times =
+        std::is_same_v<decltype(tpl2), std::tuple<int&&,double&,std::string&&>> and
+        std::is_same_v<decltype(tpl3), std::tuple<int&&,double&,std::string&&>>;
+      // clang-format on
+      STATIC_CHECK_FALSE(Happens1In36Times);
+    }
   }
 }

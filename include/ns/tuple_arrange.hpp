@@ -39,7 +39,7 @@ namespace ns {
   // tuple_select
 
   template <std::size_t... Is>
-  constexpr auto tuple_select(auto&& tpl) -> std::tuple<
+  constexpr auto tuple_select(valid_tuple auto&& tpl) -> std::tuple<
     std::tuple_element_t<Is, std::remove_reference_t<decltype(tpl)>>...> {
     return {std::get<Is>(std::forward<decltype(tpl)>(tpl))...};
   }
@@ -70,7 +70,7 @@ namespace ns {
   // tuple_select_by_type
 
   template <typename... Ts>
-  constexpr decltype(auto) tuple_select_by_type(auto&& tpl) {
+  constexpr decltype(auto) tuple_select_by_type(valid_tuple auto&& tpl) {
     return tuple_select<
       tuple_element_index_v<Ts, std::remove_reference_t<decltype(tpl)>>...>(
       std::forward<decltype(tpl)>(tpl));
@@ -214,7 +214,7 @@ namespace ns {
   // tuple_shuffle
 
   template <std::uint64_t State>
-  constexpr decltype(auto) tuple_shuffle(auto&& tpl) {
+  constexpr decltype(auto) tuple_shuffle(valid_tuple auto&& tpl) {
     return [&]<std::size_t... Is>(std::index_sequence<Is...>) {
       constexpr auto indices = make_permutation<sizeof...(Is)>(State);
       return tuple_select<indices[Is]...>(std::forward<decltype(tpl)>(tpl));
