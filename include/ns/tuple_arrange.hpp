@@ -8,6 +8,34 @@
 #include <utility>
 
 namespace ns {
+  // valid_tuple
+
+  // clang-format off
+  template <class Tuple>
+  struct is_tuple : std::false_type {};
+  template <class Tuple>
+  struct is_tuple<const Tuple> : is_tuple<Tuple> {};
+  template <class... Ts>
+  struct is_tuple<std::tuple<Ts...>> : std::true_type {};
+  template <class Tuple>
+  inline constexpr bool is_tuple_v = is_tuple<Tuple>::value;
+
+  template <class Tuple>
+  struct holds_rvalue_reference;
+  template <class Tuple>
+  struct holds_rvalue_reference<const Tuple> : holds_rvalue_reference<Tuple> {};
+  template <class... Ts>
+  struct holds_rvalue_reference<std::tuple<Ts...>>
+    : std::disjunction<std::is_rvalue_reference<Ts>...> {};
+  template <class Tuple>
+  inline constexpr bool holds_rvalue_reference_v = holds_rvalue_reference<Tuple>::value;
+  // clang-format on
+
+  template <class Tuple>
+  concept valid_tuple = is_tuple_v<std::remove_reference_t<Tuple>> and
+    not(std::is_lvalue_reference_v<Tuple> and
+        holds_rvalue_reference_v<std::remove_reference_t<Tuple>>);
+
   // tuple_select
 
   template <std::size_t... Is>

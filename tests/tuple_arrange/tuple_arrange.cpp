@@ -6,6 +6,16 @@
 #include <format>
 #include <string>
 
+TEST_CASE("valid_tuple", "[tuple_arrange][valid_tuple]") {
+  STATIC_CHECK(ns::valid_tuple<std::tuple<int, double, std::string>>);
+  STATIC_CHECK(ns::valid_tuple<std::tuple<int&, double&&, std::string&>>);
+  STATIC_CHECK(ns::valid_tuple<std::tuple<int, double, std::string>&>);
+  STATIC_CHECK_FALSE(
+    ns::valid_tuple<std::tuple<int&, double&&, std::string&>&>);
+  STATIC_CHECK(ns::valid_tuple<std::tuple<int, double, std::string>&&>);
+  STATIC_CHECK(ns::valid_tuple<std::tuple<int&, double&&, std::string&>&&>);
+}
+
 TEST_CASE("tuple_select", "[tuple_arrange][tuple_select]") {
   std::tuple tpl{0, 3.14, std::string("Hello")};
   {
