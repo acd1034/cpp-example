@@ -11,23 +11,23 @@ on:
 jobs:
   build:
     name: ${{matrix.pkg_name}}, C++${{matrix.std}}, ${{matrix.build_type}} build
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     strategy:
       matrix:
         pkg_name:
-          - g++-12
-          # - clang-13
+          - g++-14
+          - clang-18
         build_type: [Debug, Release]
         std: [20]
         include:
-          - pkg_name: g++-12
-            compiler: g++-12
-          # - pkg_name: clang-13
-          #   compiler: clang++-13
+          - pkg_name: g++-14
+            compiler: g++-14
+          - pkg_name: clang-18
+            compiler: clang++-18
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
 
